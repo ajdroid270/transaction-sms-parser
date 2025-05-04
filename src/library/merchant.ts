@@ -36,21 +36,29 @@ const extractMerchantInfo = (message: TMessageType) => {
 
   if (match) {
     if (match === "upi-") {
-      let merchantInfo = processedMessage.filter((word) => word.startsWith("upi-"))[0];
-      if (merchantInfo) {
-        const merchantDetails = merchantInfo.split("-");
-        transactionDetails.merchant = merchantDetails[2];
-        transactionDetails.referenceNo = merchantDetails[1];
+      const regex = /upi-([0-9]+)-([a-zA-Z0-9\s]+)/i;
+      const matchResult = messageString.match(regex);
+
+      if (matchResult) {
+        transactionDetails.referenceNo = matchResult[1]; // Extracted reference number
+        transactionDetails.merchant = matchResult[2].trim(); // Extracted merchant name
       }
     } else if (match === "upi:") {
       try {
-        const transactionInfoString = messageString.split(";")[1];
-        const transactionInfo = transactionInfoString?.split?.("credited .");
-        transactionDetails.merchant = transactionInfo[0];
-        transactionDetails.referenceNo = transactionInfo[1].split(".")[0].split(":")[1];
+        const upiRegex = /upi:([0-9]+)/i;
+        const matchResult = messageString.match(upiRegex);
+        if (matchResult) {
+          transactionDetails.referenceNo = matchResult[1]; // Extract reference number
+        }
+
+        // Extract merchant name based on "credited" and preceding semicolon
+        const creditedRegex = /;([^;]+)\s+credited/i;
+        const creditedMatch = messageString.match(creditedRegex);
+        if (creditedMatch) {
+          transactionDetails.merchant = creditedMatch[1].trim();
+        }
       } catch (error) {
         console.error("Error parsing UPI message: ", error);
-
       }
     } else {
       const nextWord = getNextWords(messageString, match);
