@@ -25,7 +25,7 @@ export const processMessage = (message: string): string[] => {
 	// remove '!'
 	messageStr = messageStr.replace(/!/g, "");
 	// remove ':'
-	messageStr = messageStr.replace(/:/g, " ");
+	// messageStr = messageStr.replace(/:/g, " ");
 	// remove '/'
 	messageStr = messageStr.replace(/\//g, "");
 	// remove '='
