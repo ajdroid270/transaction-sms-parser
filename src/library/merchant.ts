@@ -81,20 +81,16 @@ const extractMerchantInfo = (message: TMessageType) => {
       } else {
         transactionDetails.merchant = nextWord;
       }
-
-      if (!transactionDetails.merchant) {
-        const upiRegex = new RegExp(
-          `[a-zA-Z0-9_-]+(${upiHandles.join("|")})`,
-          "gi",
-        );
-        const matches = messageString.match(upiRegex);
-        if (matches && matches.length > 0) {
-          const merchant = matches[0].split(" ").pop(); // return only first match
-          transactionDetails.merchant = merchant ?? null;
-        }
-      }
     }
-	}
+  }
+
+  if (!transactionDetails.merchant) {
+    const cardTransactionRegex = /spent\s.*?\son\s([a-zA-Z0-9\s&_]+)\./i; // Updated regex to include '_'
+    const cardTransactionMatch = messageString.match(cardTransactionRegex);
+    if (cardTransactionMatch) {
+      transactionDetails.merchant = cardTransactionMatch[1].trim();
+    }
+  }
 
 	/* const additionalKeywords = ['at', 'to', 'info'];
   if (!merchantInfo.merchantName && !merchantInfo.transactionId) {
