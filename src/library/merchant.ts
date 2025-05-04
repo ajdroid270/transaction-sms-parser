@@ -51,11 +51,18 @@ const extractMerchantInfo = (message: TMessageType) => {
           transactionDetails.referenceNo = matchResult[1]; // Extract reference number
         }
 
-        // Extract merchant name based on "credited" and preceding semicolon
-        const creditedRegex = /;([^;]+)\s+credited/i;
-        const creditedMatch = messageString.match(creditedRegex);
-        if (creditedMatch) {
-          transactionDetails.merchant = creditedMatch[1].trim();
+        // Extract merchant name based on "credited" and "from"
+        const creditedFromRegex = /credited\s.*?\sfrom\s([a-zA-Z0-9\s]+)\./i;
+        const creditedFromMatch = messageString.match(creditedFromRegex);
+        if (creditedFromMatch) {
+          transactionDetails.merchant = creditedFromMatch[1].trim();
+        } else {
+          // Fallback to "credited" and preceding semicolon
+          const creditedRegex = /;([^;]+)\s+credited/i;
+          const creditedMatch = messageString.match(creditedRegex);
+          if (creditedMatch) {
+            transactionDetails.merchant = creditedMatch[1].trim();
+          }
         }
       } catch (error) {
         console.error("Error parsing UPI message: ", error);
